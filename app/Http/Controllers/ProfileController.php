@@ -24,17 +24,39 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
+    // public function update(ProfileUpdateRequest $request): RedirectResponse
+    // {
+    //     $request->user()->fill($request->validated());
+
+    //     if ($request->user()->isDirty('email')) {
+    //         $request->user()->email_verified_at = null;
+    //     }
+
+    //     $request->user()->save();
+
+    //     return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    // }
+
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // isi field agent dari request terverifikasi
+        $user->fill($request->validated());
+
+        // jaga logika verifikasi email bawaan Breeze
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        // setiap update profil oleh agent -> kembali pending (menunggu admin)
+        $user->profile_status = \App\Models\User::PROFILE_PENDING;
+        $user->profile_approved_by = null;
+        $user->profile_approved_at = null;
+        // boleh biarkan approval_note lama agar agent tahu catatan sebelumnya
+        $user->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::route('profile.edit')->with('status', 'Profil diperbarui. Menunggu verifikasi admin.');
     }
 
     /**

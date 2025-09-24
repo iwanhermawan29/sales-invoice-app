@@ -38,4 +38,9 @@ class Product extends Model
     {
         return $this->type === self::TYPE_HEALTH ? 'Asuransi Kesehatan' : 'Asuransi Jiwa';
     }
+
+    public function sales()
+    {
+        return $this->hasMany(\App\Models\Sale::class);
+    }
 }

@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        <img src="{{ asset('image/30.png') }}" alt="Gen Prime" class="block h-16 w-auto">
                     </a>
                 </div>
 
@@ -15,47 +15,148 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @if (Auth::user()->isRole('head'))
-                        <x-nav-link :href="route('reports.sales-targets.index')" :active="request()->routeIs('reports.sales-targets.*')">
-                            {{ __('Report Target') }}
+                    @if (auth()->user()->isRole('head'))
+                        <x-nav-link :href="route('head.reports.index')" :active="request()->routeIs('head.reports.*')">
+                            {{ __('Reports') }}
                         </x-nav-link>
-                        {{-- <x-nav-link :href="route('items.index')" :active="request()->routeIs('items.*')">
-                            {{ __('Master Items') }}
-                        </x-nav-link> --}}
-                        {{-- <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
-                            {{ __('Master Customers') }}
-                        </x-nav-link> --}}
-                        {{-- <x-nav-link :href="route('sales-orders.index')" :active="request()->routeIs('sales-orders.*')">
-                            {{ __('Sales Orders') }}
-                        </x-nav-link> --}}
                     @endif
                     @if (Auth::user()->isRole('admin'))
-                        <x-nav-link :href="route('sales-targets.index')" :active="request()->routeIs('sales-targets.index')">
+                        @php
+                            // Helper: aktifkan parent ketika salah satu child aktif
+                            $verifyActive = request()->routeIs('admin.agents.*') || request()->routeIs('admin.sales.*');
+                            $masterActive = request()->routeIs('users.*') || request()->routeIs('products.*');
+                        @endphp
+                        <x-nav-link :href="route('contests.index')" :active="request()->routeIs('contests.*')">
+                            <svg class="h-4 w-4 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            Kontes
+                        </x-nav-link>
+                        <x-nav-link :href="route('galleries.index')" :active="request()->routeIs('galleries.*')">
+                            <svg class="h-4 w-4 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            {{ __('Galeri') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('collaborations.index')" :active="request()->routeIs('collaborations.*')">
+                            <svg class="h-4 w-4 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            Collaboration
+                        </x-nav-link>
+                        <x-nav-link :href="route('targets-penjualan.index')" :active="request()->routeIs('targets-penjualan.*')">
+                            <svg class="h-4 w-4 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
                             {{ __('Target Penjualan') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('event-targets.index')" :active="request()->routeIs('event-targets.*')">
+                        {{-- <x-nav-link :href="route('event-targets.index')" :active="request()->routeIs('event-targets.*')">
                             {{ __('Event Targets') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
-                            {{ __('Master Produk') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
-                            {{ __('Users') }}
-                        </x-nav-link>
+                        </x-nav-link> --}}
+                        <div class="hidden sm:flex items-center gap-2" x-data="{ openVerif: false, openMaster: false }">
+                            {{-- Verifikasi (dropdown) --}}
+                            <div class="relative">
+                                <button @click="openVerif = !openVerif; openMaster = false"
+                                    @click.away="openVerif = false"
+                                    class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium
+                       {{ $verifyActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300' }}
+                       hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none">
+                                    <svg class="h-4 w-4 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                    </svg>
+                                    Verifikasi
+                                    <svg class="ms-1 h-4 w-4 transition-transform"
+                                        :class="openVerif ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div x-cloak x-show="openVerif"
+                                    class="absolute z-40 mt-2 w-56 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow"
+                                    x-transition>
+                                    <a href="{{ route('admin.agents.index') }}"
+                                        class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800
+                          {{ request()->routeIs('admin.agents.*') ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-200' }}">
+                                        Verifikasi Agent
+                                    </a>
+                                    <a href="{{ route('admin.sales.index') }}"
+                                        class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800
+                          {{ request()->routeIs('admin.sales.*') ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-200' }}">
+                                        Verifikasi Penjualan
+                                    </a>
+                                </div>
+                            </div>
+
+                            {{-- Master (dropdown) --}}
+                            <div class="relative">
+                                <button @click="openMaster = !openMaster; openVerif = false"
+                                    @click.away="openMaster = false"
+                                    class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium
+                       {{ $masterActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300' }}
+                       hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none">
+                                    <svg class="h-4 w-4 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M3 7h18M3 12h18M3 17h18" />
+                                    </svg>
+                                    Master
+                                    <svg class="ms-1 h-4 w-4 transition-transform"
+                                        :class="openMaster ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div x-cloak x-show="openMaster"
+                                    class="absolute z-40 mt-2 w-56 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow"
+                                    x-transition>
+                                    <a href="{{ route('users.index') }}"
+                                        class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800
+                          {{ request()->routeIs('users.*') ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-200' }}">
+                                        Users
+                                    </a>
+                                    <a href="{{ route('products.index') }}"
+                                        class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800
+                          {{ request()->routeIs('products.*') ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-200' }}">
+                                        Master Produk
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     @endif
                     @if (auth()->user()->isRole('agent'))
                         <!-- Buat Target -->
-                        <x-nav-link :href="route('sales-targets.create')" :active="request()->routeIs('sales-targets.create')">
-                            {{ __('Buat Target') }}
-                        </x-nav-link>
 
-                        <x-nav-link :href="route('event-targets.index')" :active="request()->routeIs('event-targets.*')">
-                            {{ __('Event Targets') }}
-                        </x-nav-link>
-
-                        <!-- Lihat Daftar Target -->
-                        <x-nav-link :href="route('sales-targets.index')" :active="request()->routeIs('sales-targets.index')">
+                        <x-nav-link :href="route('agent.targets.index')" :active="request()->routeIs('agent.targets.index')">
+                            <svg class="h-4 w-4 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
                             {{ __('Target Penjualan') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('agent.contests.index')" :active="request()->routeIs('agent.contests.index')">
+                            <svg class="h-4 w-4 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            Kontes
+                        </x-nav-link>
+                        <!-- Lihat Daftar Target -->
+                        {{-- <x-nav-link :href="route('sales-targets.index')" :active="request()->routeIs('sales-targets.index')">
+                            {{ __('Target Penjualan') }}
+                        </x-nav-link> --}}
+
+                        <x-nav-link :href="route('sales.index')" :active="request()->routeIs('sales.*')">
+                            <svg class="h-4 w-4 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            {{ __('Penjualan') }}
                         </x-nav-link>
                     @endif
                 </div>
